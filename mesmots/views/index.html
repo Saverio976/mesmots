@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MesMots</title>
+</head>
+<body>
+    <h1>MesMots</h1>
+
+    <h2>Get phonectics from word</h2>
+
+    <form>
+        <label for="fwordsplit">Word:</label>
+        <input type="text" id="fwordsplit" name="fwordsplit"><br>
+    </form>
+    <p><samp id="fwordsplitResult" style="letter-spacing:0.1rem"></samp></p>
+
+
+    <h2>Get words from phonectics</h2>
+
+    <p>Filters:</p>
+    <p>- Starts with: <code>startswith("x")</code></p>
+    <p>- - - example: <code>startswith("b§Z")</code></p>
+    <p>- Ends with: <code>endswith("x")</code></p>
+    <p>- - - example: <code>endswith("Et")</code></p>
+    <p>- Contains: <code>contains("x")</code></p>
+    <p>- - - example: <code>contains("Et")</code></p>
+    <p>Operators:</p>
+    <p>- And: <code>&</code> Example: <code>filter & filter</code></p>
+    <p>- Or: <code>|</code> Example: <code>filter | filter</code></p>
+    <p>- Xor: <code>^</code> Example: <code>filter ^ filter</code></p>
+    <p>Examples:</p>
+    <p>- Basic example: <code>startswith("ba")</code></p>
+    <p>- With operators: <code>and(startswith("ba"), endswith("Et"))</code></p>
+    <p>- With operators: <code>or(startswith("ba"), startswith("b§Z"))</code></p>
+    <p>- With two operators: <code>and(or(startswith("ba"), startswith("b§Z")), endswith("Et"))</code></p>
+
+    <form>
+        <label for="fphonetics">Phonectics:</label>
+        <textarea id="fphonetics" name="fphonetics"></textarea>
+    </form>
+    <p><samp id="fphoneticsResult" style="letter-spacing:0.1rem"></samp></p>
+
+
+    <script>
+        const apiUrl = `${location.protocol}//${location.host}/api/v1/`;
+        console.log(apiUrl);
+        async function apiSplits(s) {
+            const req = await fetch(apiUrl + `split/${s}/`);
+            if (!req.ok) {
+                return [];
+            }
+            const data = await req.json();
+            return data.splits;
+        }
+        async function apiFind(s) {
+            const req = await fetch(apiUrl + `find/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({text: s}),
+            });
+            if (!req.ok) {
+                return [];
+            }
+            const data = await req.json();
+            return data.words;
+        }
+
+        let fwordsplitTO = setTimeout(function () {}, 1);
+        const fwordsplit = document.getElementById("fwordsplit");
+        const fwordsplitResult = document.getElementById("fwordsplitResult");
+        fwordsplit.addEventListener("input", function (evt) {
+            clearTimeout(fwordsplitTO);
+            fwordsplitTO = setTimeout(async function () {
+                const splits = await apiSplits(evt.target.value);
+                fwordsplitResult.innerText = splits.join(", ");
+            }, 200);
+        });
+
+        let fphoneticsTO = setTimeout(function () {}, 1);
+        const fphonetics = document.getElementById("fphonetics");
+        const fphoneticsResult = document.getElementById("fphoneticsResult");
+        fphonetics.addEventListener("input", function (evt) {
+            clearTimeout(fphoneticsTO);
+            fphoneticsTO = setTimeout(async function () {
+                const splits = await apiFind(evt.target.value);
+                fphoneticsResult.innerText = splits.join(", ");
+            }, 200);
+        });
+    </script>
+</body>
+</html>
