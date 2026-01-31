@@ -18,11 +18,10 @@ class Mots:
 
     LEX: polars.DataFrame
 
-    def __init__(self, lexique_path: str = "./Lexique383/Lexique383.tsv") -> None:
+    def __init__(self, lexique_path: str = "./Lexique383/Lexique383.csv") -> None:
         self.LEX = polars.read_csv(
             lexique_path,
             has_header=True,
-            separator="\t"
         ).select("ortho", "phon", "cgram")
 
     def endswith(self, phon: str) -> polars.Expr:
@@ -61,6 +60,9 @@ class Mots:
 
     def head(self, s: str, n: int) -> str:
         return s[:n]
+    
+    def write_csv(self, file: str):
+        self.LEX.write_csv(file)
 
 
 def main():
@@ -74,6 +76,8 @@ def main():
     print("r3", m.apply(r3), "r3")
     r4 = m.category(Mots.Category.ADJ)
     print("r4", m.apply(m.and_(m.or_(r1, r2), r4)), "r4")
+
+    m.write_csv("./Lexique383/Lexique383.csv")
 
 
 if __name__ == "__main__":

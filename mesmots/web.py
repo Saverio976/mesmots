@@ -1,4 +1,7 @@
-DEBUG = True
+import os
+DEBUG = True if os.getenv("ENVIRON") else False
+HOST = os.getenv("HOST", "0.0.0.0")
+PORT = os.getenv("PORT", "8080")
 from bottle import debug
 debug(DEBUG)
 
@@ -8,7 +11,7 @@ from simpleeval import SimpleEval
 from mots import Mots
 
 app = Bottle()
-mots = Mots("../Lexique383/Lexique383.tsv")
+mots = Mots("../Lexique383/Lexique383.csv")
 seval = SimpleEval()
 
 seval.functions["startswith"] = lambda x: mots.startswith(x)
@@ -46,4 +49,4 @@ def find():
 
 
 def start():
-    app.run(host="0.0.0.0", port=8080, debug=DEBUG, reloader=True)
+    app.run(host=HOST, port=int(PORT), debug=DEBUG, reloader=DEBUG)
