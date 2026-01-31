@@ -9,6 +9,8 @@ pinned: false
 
 # mesmots
 
+> Try: [https://huggingface.co/spaces/Saverio976/MesMots](https://huggingface.co/spaces/Saverio976/MesMots)
+
 French lexic.
 
 search for phonetic relation between words.
