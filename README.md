@@ -1,3 +1,12 @@
+---
+title: MesMots
+emoji: 📈
+colorFrom: gray
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # mesmots
 
 French lexic.
