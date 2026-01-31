@@ -2,6 +2,18 @@
 <html>
 <head>
     <title>MesMots</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" rel="stylesheet">
+    <style>
+    body {
+        background-color: black;
+        color: white;
+    }
+    code {
+        font-weight: bolder;
+        font-family: monospace;
+        font-size: x-large;
+    }
+    </style>
 </head>
 <body>
     <h1>MesMots</h1>
@@ -18,30 +30,60 @@
     <h2>Get words from phonectics</h2>
 
     <p>Filters:</p>
-    <p>- Starts with: <code>startswith("x")</code></p>
-    <p>- - - example: <code>startswith("b§Z")</code></p>
-    <p>- Ends with: <code>endswith("x")</code></p>
-    <p>- - - example: <code>endswith("Et")</code></p>
-    <p>- Contains: <code>contains("x")</code></p>
-    <p>- - - example: <code>contains("Et")</code></p>
+    <p>- Starts with: <pre><code class="language-python">startswith("x")</code></pre></p>
+    <p>- - - example: <pre><code class="language-python">startswith("b§Z")</code></pre></p>
+    <p>- Ends with: <pre><code class="language-python">endswith("x")</code></pre></p>
+    <p>- - - example: <pre><code class="language-python">endswith("Et")</code></pre></p>
+    <p>- Contains: <pre><code class="language-python">contains("x")</code></pre></p>
+    <p>- - - example: <pre><code class="language-python">contains("Et")</code></pre></p>
     <p>Operators:</p>
-    <p>- And: <code>&</code> Example: <code>filter & filter</code></p>
-    <p>- Or: <code>|</code> Example: <code>filter | filter</code></p>
-    <p>- Xor: <code>^</code> Example: <code>filter ^ filter</code></p>
+    <p>- And: <pre><code class="language-python">&</code></pre> Example: <pre><code class="language-python">filter & filter</code></pre></p>
+    <p>- Or: <pre><code class="language-python">|</code></pre> Example: <pre><code class="language-python">filter | filter</code></pre></p>
+    <p>- Xor: <pre><code class="language-python">^</code></pre> Example: <pre><code class="language-python">filter ^ filter</code></pre></p>
     <p>Examples:</p>
-    <p>- Basic example: <code>startswith("ba")</code></p>
-    <p>- With operators: <code>and(startswith("ba"), endswith("Et"))</code></p>
-    <p>- With operators: <code>or(startswith("ba"), startswith("b§Z"))</code></p>
-    <p>- With two operators: <code>and(or(startswith("ba"), startswith("b§Z")), endswith("Et"))</code></p>
-
+    <p>- Basic example: <pre><code class="language-python">startswith("ba")</code></pre></p>
+    <p>- With operators: <pre><code class="language-python">(startswith("ba") & endswith("Et"))</code></pre></p>
+    <p>- With operators: <pre><code class="language-python">(startswith("ba") | startswith("b§Z"))</code></pre></p>
+    <p>- With two operators: <pre><code class="language-python">((startswith("ba") | startswith("b§Z")) & endswith("Et"))</code></pre></p>
+<!-- <div id="area" style="width:300px;height:300px;"    contentEditable="true"   ></div> -->
     <form>
         <label for="fphonetics">Phonectics:</label>
-        <textarea id="fphonetics" name="fphonetics"></textarea>
+        <pre><code
+            id="fphonetics"
+            class="language-python"
+            contenteditable="plaintext-only"
+            spellcheck="false"
+        ></code></pre>
     </form>
     <p><samp id="fphoneticsResult" style="letter-spacing:0.1rem"></samp></p>
 
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>
+        // highlight
+        hljs.configure({});
+        const languages = hljs.listLanguages();
+        for (language of languages) {
+            hljs.unregisterLanguage(language);
+        }
+        hljs.registerLanguage("python", function () {
+            return {
+                case_insensitive: false,
+                keywords: {
+                    built_in: ["startswith", "endswith", "contains"],
+                    punctuation: ["|", "^", "&", "(", ")"],
+                    variable: ["filter"]
+                },
+                contains: [
+                    {
+                        scope: 'string',
+                        begin: '"', end: '"'
+                    },
+                ]
+            };
+        });
+        hljs.highlightAll();
+
+        // backend
         const apiUrl = `${location.protocol}//${location.host}/api/v1/`;
         console.log(apiUrl);
         async function apiSplits(s) {
@@ -67,6 +109,7 @@
             return data.words;
         }
 
+        // Get phonectics from word
         let fwordsplitTO = setTimeout(function () {}, 1);
         const fwordsplit = document.getElementById("fwordsplit");
         const fwordsplitResult = document.getElementById("fwordsplitResult");
@@ -75,18 +118,25 @@
             fwordsplitTO = setTimeout(async function () {
                 const splits = await apiSplits(evt.target.value);
                 fwordsplitResult.innerText = splits.join(", ");
-            }, 200);
+            }, 500);
         });
 
+        // Get words from phonectics
         let fphoneticsTO = setTimeout(function () {}, 1);
         const fphonetics = document.getElementById("fphonetics");
         const fphoneticsResult = document.getElementById("fphoneticsResult");
-        fphonetics.addEventListener("input", function (evt) {
-            clearTimeout(fphoneticsTO);
-            fphoneticsTO = setTimeout(async function () {
-                const splits = await apiFind(evt.target.value);
-                fphoneticsResult.innerText = splits.join(", ");
-            }, 200);
+        fphonetics.addEventListener("keypress", function (evt) {
+            if (evt.key === "Enter") {
+                event.preventDefault();
+                clearTimeout(fphoneticsTO);
+                fphoneticsTO = setTimeout(async function () {
+                    fphonetics.innerText = evt.target.innerText;
+                    delete fphonetics.dataset.highlighted;
+                    hljs.highlightElement(fphonetics);
+                    const splits = await apiFind(evt.target.innerText);
+                    fphoneticsResult.innerText = splits.join(", ");
+                }, 500);
+            }
         });
     </script>
 </body>

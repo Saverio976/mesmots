@@ -1,6 +1,9 @@
-from bottle import Bottle, debug, abort, view, request
+DEBUG = True
+from bottle import debug
+debug(DEBUG)
+
+from bottle import Bottle, abort, view, request
 from simpleeval import SimpleEval
-debug(True)
 
 from mots import Mots
 
@@ -18,7 +21,7 @@ seval.functions["xor"] = lambda x,y: mots.xor_(x, y)
 @app.route("/")
 @view("index.html")
 def index():
-    return {}
+    return {"DEBUG": "true" if DEBUG else "false"}
 
 @app.route("/api/v1/split/<word>/")
 def split(word: str):
@@ -31,11 +34,16 @@ def split(word: str):
 def find():
     if request.content_type != "application/json":
         abort(400, "The content_type must be 'application/json'")
+    if "text" not in request.json:
+        abort(400, "The 'text' is not in json body")
     text = request.json["text"]
-    res = seval.eval(text)
+    try:
+        res = seval.eval(text)
+    except Exception as e:
+        abort(400, f"Failed to compute: {e}")
     words = mots.apply(res)
     return {"words": words}
 
 
 def start():
-    app.run(host="0.0.0.0", port=8080, debug=True, reloader=True)
+    app.run(host="0.0.0.0", port=8080, debug=DEBUG, reloader=True)
