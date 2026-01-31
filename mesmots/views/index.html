@@ -22,65 +22,66 @@
 
     <p>The code is available at <a href="https://github.com/Saverio976/mesmots/">github.com/Saverio976/mesmots/</a></p>
 
-    <h2>Get phonectics from word</h2>
+    <div id="get_phonetics_from_word" style="border-style: inset; padding: 5px; margin: 5px">
+        <h2>Get phonectics from word</h2>
 
-    <details open="true" style="border-style: dashed; padding: 5px;">
-        <summary>Cheat Sheet</summary>
-        <p>Enter a word, you will get live results once the word match a word in the database.<p>
-    </details>
+        <details open="true" style="border-style: dashed; padding: 5px;">
+            <summary>Cheat Sheet</summary>
+            <p>Enter a word, you will get live results once the word match a word in the database.<p>
+        </details>
+        <br>
 
-    <form>
-        <label for="fwordsplit">Word:</label>
-        <input type="text" id="fwordsplit" name="fwordsplit"><br>
-    </form>
-    <p><samp id="fwordsplitResult" style="letter-spacing:0.1rem"></samp></p>
+        <form>
+            <label for="fwordsplit">Word:</label>
+            <input type="text" id="fwordsplit" name="fwordsplit"><br>
+        </form>
+        <p><samp id="fwordsplitResult" style="letter-spacing:0.1rem"></samp></p>
+    </div>
 
+    <div id="get_words_from_phonetics" style="border-style: inset; padding: 5px; margin: 5px">
+        <h2>Get words from phonectics</h2>
 
-    <h2>Get words from phonectics</h2>
+        <details style="border-style: dashed; padding: 5px;">
+            <summary>Documentation</summary>
+            <p>Filters:</p>
+            <p>- Starts with: <pre><code class="language-python">startswith("x")</code></pre></p>
+            <p>- - - example: <pre><code class="language-python">startswith("b§Z")</code></pre></p>
+            <p>- Ends with: <pre><code class="language-python">endswith("x")</code></pre></p>
+            <p>- - - example: <pre><code class="language-python">endswith("Et")</code></pre></p>
+            <p>- Contains: <pre><code class="language-python">contains("x")</code></pre></p>
+            <p>- - - example: <pre><code class="language-python">contains("Et")</code></pre></p>
+            <p>Operators:</p>
+            <p>- And: <pre><code class="language-python">&</code></pre> Example: <pre><code class="language-python">filter & filter</code></pre></p>
+            <p>- Or: <pre><code class="language-python">|</code></pre> Example: <pre><code class="language-python">filter | filter</code></pre></p>
+            <p>- Xor: <pre><code class="language-python">^</code></pre> Example: <pre><code class="language-python">filter ^ filter</code></pre></p>
+            <p>Examples:</p>
+            <p>- Basic example: <pre><code class="language-python">startswith("ba")</code></pre></p>
+            <p>- With operators: <pre><code class="language-python">(startswith("ba") & endswith("Et"))</code></pre></p>
+            <p>- With operators: <pre><code class="language-python">(startswith("ba") | startswith("b§Z"))</code></pre></p>
+            <p>- With two operators: <pre><code class="language-python">((startswith("ba") | startswith("b§Z")) & endswith("Et"))</code></pre></p>
+            <p>Once finished, get results by pressing the "ENTER" key</p>
+        </details>
+        <br>
 
-    <details style="border-style: dashed; padding: 5px;">
-        <summary>Documentation</summary>
-        <p>Filters:</p>
-        <p>- Starts with: <pre><code class="language-python">startswith("x")</code></pre></p>
-        <p>- - - example: <pre><code class="language-python">startswith("b§Z")</code></pre></p>
-        <p>- Ends with: <pre><code class="language-python">endswith("x")</code></pre></p>
-        <p>- - - example: <pre><code class="language-python">endswith("Et")</code></pre></p>
-        <p>- Contains: <pre><code class="language-python">contains("x")</code></pre></p>
-        <p>- - - example: <pre><code class="language-python">contains("Et")</code></pre></p>
-        <p>Operators:</p>
-        <p>- And: <pre><code class="language-python">&</code></pre> Example: <pre><code class="language-python">filter & filter</code></pre></p>
-        <p>- Or: <pre><code class="language-python">|</code></pre> Example: <pre><code class="language-python">filter | filter</code></pre></p>
-        <p>- Xor: <pre><code class="language-python">^</code></pre> Example: <pre><code class="language-python">filter ^ filter</code></pre></p>
-        <p>Examples:</p>
-        <p>- Basic example: <pre><code class="language-python">startswith("ba")</code></pre></p>
-        <p>- With operators: <pre><code class="language-python">(startswith("ba") & endswith("Et"))</code></pre></p>
-        <p>- With operators: <pre><code class="language-python">(startswith("ba") | startswith("b§Z"))</code></pre></p>
-        <p>- With two operators: <pre><code class="language-python">((startswith("ba") | startswith("b§Z")) & endswith("Et"))</code></pre></p>
+        <details open="true" style="border-style: dashed; padding: 5px;">
+            <summary>Cheat Sheet</summary>
+            <p>Filters: <pre><code class="language-python">startswith("x") endswith("x") contains("x")</code></pre><p>
+            <p>Operators: <pre><code class="language-python">& | ^</code></pre><p>
+            <p>Once finished, get results by pressing the "ENTER" key</p>
+        </details>
+        <br>
 
-        <p>Once finished, get results by pressing the "ENTER" key</p>
-    </details>
-
-    <br>
-
-    <details open="true" style="border-style: dashed; padding: 5px;">
-        <summary>Cheat Sheet</summary>
-        <p>Filters: <pre><code class="language-python">startswith("x") endswith("x") contains("x")</code></pre><p>
-        <p>Operators: <pre><code class="language-python">& | ^</code></pre><p>
-        <p>Once finished, get results by pressing the "ENTER" key</p>
-    </details>
-
-    <br>
-
-    <form>
-        <label for="fphonetics">Phonectics:</label>
-        <pre><code
-            id="fphonetics"
-            class="language-python"
-            contenteditable="plaintext-only"
-            spellcheck="false"
-        ></code></pre>
-    </form>
-    <p><samp id="fphoneticsResult" style="letter-spacing:0.1rem"></samp></p>
+        <form>
+            <label for="fphonetics">Phonectics:</label>
+            <pre><code
+                id="fphonetics"
+                class="language-python"
+                contenteditable="plaintext-only"
+                spellcheck="false"
+            ></code></pre>
+        </form>
+        <p><samp id="fphoneticsResult" style="letter-spacing:0.1rem"></samp></p>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>
