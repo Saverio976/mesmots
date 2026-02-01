@@ -4,32 +4,6 @@ from typing import final
 import polars as pl
 from utils import get_likeness_word
 
-@dataclass(slots=True, kw_only=True)
-class SyllabRelationDecoder:
-    orthosyll: str
-    ortho_before: str
-    ortho_after: str
-
-@final
-@dataclass(slots=True, kw_only=True)
-class SyllabRelationEncoder(SyllabRelationDecoder):
-    syll: str
-    nb_usage: int
-
-@final
-@dataclass(slots=True, kw_only=True)
-class SyllabLikeness:
-    input: SyllabRelationDecoder
-    target: SyllabRelationEncoder
-    score: float
-
-
-def get_likeness(input: SyllabRelationDecoder, target: SyllabRelationEncoder, max_value: int = 50, coef_max: int = 50) -> SyllabLikeness:
-    score = 0.0
-    score += get_likeness_word(input.ortho_before, target.ortho_before, reverse=True, max_value=max_value, len_penaly=True)
-    score += get_likeness_word(input.ortho_after, target.ortho_after, reverse=False, max_value=max_value, len_penaly=True)
-    return SyllabLikeness(input=input, target=target, score=(score * target.nb_usage) / coef_max)
-
 
 def apply_likeness(row: dict) -> float:
     orthosyll = row["orthosyll"]
@@ -104,14 +78,14 @@ class SyllabDecoder:
             pl.lit(self.nb_usage_max).alias("nb_usage_max"),
         )
 
-    def get(self, relation: SyllabRelationDecoder, nb_result: int = 5) -> list[tuple[float, str]]:
+    def get(self, orthosyll: str, ortho_before: str, ortho_after: str, nb_result: int = 5) -> list[tuple[float, str]]:
         res = (
             self.df
-            .filter(pl.col("orthosyll") == relation.orthosyll)
+            .filter(pl.col("orthosyll") == orthosyll)
             .with_columns(
-                pl.lit(relation.ortho_before).alias("input_ortho_before"),
-                pl.lit(relation.orthosyll).alias("input_orthosyll"),
-                pl.lit(relation.ortho_after).alias("input_ortho_after"),
+                pl.lit(ortho_before).alias("input_ortho_before"),
+                pl.lit(orthosyll).alias("input_orthosyll"),
+                pl.lit(ortho_after).alias("input_ortho_after"),
             )
             .with_columns(
                 pl.struct(pl.all())
@@ -134,5 +108,5 @@ class SyllabDecoder:
 if __name__ == "__main__":
     proba = SyllabDecoder("./dataset/ProbaEncoder.csv")
     print(
-        proba.get(SyllabRelationDecoder(orthosyll="bon", ortho_before="", ortho_after="jour"))
+        proba.get(orthosyll="bon", ortho_before="", ortho_after="jour")
     )

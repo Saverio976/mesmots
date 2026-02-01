@@ -1,7 +1,9 @@
+from collections.abc import Iterable
 from enum import Enum
-import polars
-import fr_core_news_sm
-from spacy_syllables import SpacySyllables
+import polars as pl
+
+from training.SyllabTokenize import SyllabTokenize
+from training.SyllabDecoder import SyllabDecoder
 
 
 class Mots:
@@ -18,70 +20,76 @@ class Mots:
         ONO = "ONO"
         CON = "CON"
 
-    LEX: polars.DataFrame
+    lex: pl.DataFrame
+    subset: Iterable[str]
+    syllab_tokenize: SyllabTokenize
+    syllab_decoder: SyllabDecoder
 
-    def __init__(self, lexique_path: str = "./Lexique383/Lexique383.csv", subset=["ortho", "phon", "cgram"], **kwargs) -> None:
-        self.LEX = polars.read_csv(
-            lexique_path,
+    def __init__(self, dataset_dir: str = "./dataset/", subset: Iterable[str] = ("ortho", "phon", "cgram"), **kwargs) -> None:
+        self.lex = pl.read_csv(
+            dataset_dir + "Lexique383.csv",
             has_header=True,
             **kwargs,
         ).select(*subset).drop_nulls()
-        self.NLP = fr_core_news_sm.load()
-        self.NLP.add_pipe("syllables", after="morphologizer")
-        self.SUBSET = subset
+        self.subset = subset
+        self.syllab_tokenize = SyllabTokenize(dataset_dir + "ProbaEncoder.csv")
+        self.syllab_decoder = SyllabDecoder(dataset_dir + "ProbaEncoder.csv")
 
-    def endswith(self, phon: str) -> polars.Expr:
-        return polars.col("phon").str.ends_with(phon)
+    def endswith(self, phon: str) -> pl.Expr:
+        return pl.col("phon").str.ends_with(phon)
 
-    def startswith(self, phon: str) -> polars.Expr:
-        return polars.col("phon").str.starts_with(phon)
+    def startswith(self, phon: str) -> pl.Expr:
+        return pl.col("phon").str.starts_with(phon)
 
-    def contains(self, phon: str) -> polars.Expr:
-        return polars.col("phon").str.contains(phon)
+    def contains(self, phon: str) -> pl.Expr:
+        return pl.col("phon").str.contains(phon)
 
-    def category(self, cat: Category) -> polars.Expr:
-        return polars.col("cgram") == cat.value
+    def category(self, cat: Category) -> pl.Expr:
+        return pl.col("cgram") == cat.value
 
-    def or_(self, a: polars.Expr, b: polars.Expr) -> polars.Expr:
+    def or_(self, a: pl.Expr, b: pl.Expr) -> pl.Expr:
         return a | b
 
-    def and_(self, a: polars.Expr, b: polars.Expr) -> polars.Expr:
+    def and_(self, a: pl.Expr, b: pl.Expr) -> pl.Expr:
         return a & b
 
-    def xor_(self, a: polars.Expr, b: polars.Expr) -> polars.Expr:
+    def xor_(self, a: pl.Expr, b: pl.Expr) -> pl.Expr:
         return a ^ b
 
-    def apply(self, expr: polars.Expr) -> list[str]:
-        return self.LEX.filter(expr).select("ortho").to_series().unique().to_list()
+    def apply(self, expr: pl.Expr) -> list[str]:
+        return self.lex.filter(expr).select("ortho").to_series().unique().to_list()
 
     def split(self, word: str) -> list[str]:
-        tmp = self.LEX.filter(polars.col("ortho") == word).select("phon")
+        tmp = self.lex.filter(pl.col("ortho") == word).select("phon")
         res: set[str] = set()
         for row in tmp.iter_rows():
             res.add(row[0])
         if len(res) != 0:
             return list(res)
-        full_syll = []
-        for x in [w._.syllables for w in self.NLP(word)]:
-            full_syll.extend(x)
-        for syll in full_syll:
-            ress = self.LEX.filter(polars.col("orthosyll").str.contains(syll)).select("orthosyll")
-            for row in ress.iter_rows():
-                row[0]
-        return []
+        print("not found in db, creating one...")
+        tokens = self.syllab_tokenize.tokenize(word)
+        if tokens is None:
+            return []
+        tokens = [""] + tokens + [""]
+        sylls: list[str] = []
+        for i in range(1, len(tokens) - 1):
+            syll = self.syllab_decoder.get(tokens[i], tokens[i - 1], tokens[i + 1])
+            if len(syll) == 0:
+                return []
+            sylls.append(syll[0][1])
+        return sylls
 
     def tail(self, s: str, n: int) -> str:
         return s[-n:]
 
     def head(self, s: str, n: int) -> str:
         return s[:n]
-    
+
     def write_csv(self, file: str):
-        self.LEX.write_csv(file)
+        self.lex.write_csv(file)
 
 
 def main():
-    SpacySyllables
     #m = Mots()
     #print("Hello from mesmots!")
     #r1 = m.endswith(m.tail(m.split("saisissant")[0], 2))
@@ -95,14 +103,7 @@ def main():
     #m.write_csv("./Lexique383/Lexique383.csv")
     print("Generating csv")
     m = Mots("./Lexique383/Lexique383.tsv", subset=["ortho", "phon", "cgram", "syll", "orthosyll"], separator="\t")
-    m.write_csv("./Lexique383/Lexique383.csv")
-    
-    print("Spacy")
-    print(m.LEX.columns)
-    print(m.LEX)
-    print(m.LEX[20].to_dict())
-    nlp.add_pipe("syllables", after="morphologizer")
-    print([w._.syllables for w in nlp("macron")])
+    m.write_csv("./datasets/Lexique383.csv")
 
 if __name__ == "__main__":
     main()
