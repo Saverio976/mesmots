@@ -1,6 +1,9 @@
 from collections.abc import Iterable
 import polars as pl
-from .utils import get_likeness_word
+try:
+    from .utils import get_likeness_word
+except ImportError:
+    from utils import get_likeness_word
 
 def apply_likeness(row: dict) -> int:
     before = row["before"]
@@ -81,7 +84,14 @@ class SyllabTokenize:
 
 
     def tokenize(self, word: str) -> list[str] | None:
-        return self.__tokenize(word, [""])
+        res = self.__tokenize(word, [""])
+        if res is None:
+            return res
+        if len(res) == 0:
+            return res
+        if res[0] == "":
+            return res[1:]
+        return res
 
 if __name__ == "__main__":
     proba = SyllabTokenize("./dataset/ProbaEncoder.csv")
