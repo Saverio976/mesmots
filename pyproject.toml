@@ -6,12 +6,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "bottle>=0.13.4",
-    "fr-core-news-sm>=3.8.0",
     "polars>=1.37.1",
     "requests>=2.32.5",
     "simpleeval>=1.0.3",
-    "spacy>=3.8.11",
-    "spacy-syllables>=3.0.2",
     "torch>=2.10.0",
 ]
 
@@ -20,5 +17,6 @@ torch = { index = "pytorch" }
 
 [[tool.uv.index]]
 name = "pytorch"
-url = "https://download.pytorch.org/whl/cpu"
+#url = "https://download.pytorch.org/whl/cpu"
+url = "https://download.pytorch.org/whl/cu130"
 explicit = true
