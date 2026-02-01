@@ -11,7 +11,7 @@ from simpleeval import SimpleEval
 from mots import Mots
 
 app = Bottle()
-mots = Mots("../Lexique383/Lexique383.csv")
+mots = Mots("../dataset/")
 seval = SimpleEval()
 
 seval.functions["startswith"] = lambda x: mots.startswith(x)
