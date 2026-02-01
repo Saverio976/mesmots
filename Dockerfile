@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir --upgrade uv
 RUN uv sync
 
 COPY --chown=user mesmots /app/mesmots
-COPY --chown=user datasets /app/datasets
+COPY --chown=user dataset /app/dataset
 
 WORKDIR /app/mesmots
 
