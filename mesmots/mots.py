@@ -102,8 +102,13 @@ def main():
     #print("r4", m.apply(m.and_(m.or_(r1, r2), r4)), "r4")
     #m.write_csv("./Lexique383/Lexique383.csv")
     print("Generating csv")
-    m = Mots("./Lexique383/Lexique383.tsv", subset=["ortho", "phon", "cgram", "syll", "orthosyll"], separator="\t")
-    m.write_csv("./datasets/Lexique383.csv")
+    df = pl.read_csv(
+        "./dataset/Lexique383.tsv",
+        has_header=True,
+        separator="\t",
+    ).select("ortho", "phon", "cgram", "syll", "orthosyll").drop_nulls()
+    print(df)
+    df.write_csv("./dataset/Lexique383.csv")
 
 if __name__ == "__main__":
     main()

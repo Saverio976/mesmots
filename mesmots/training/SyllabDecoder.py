@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import final
 import polars as pl
-from utils import get_likeness_word
+from .utils import get_likeness_word
 
 
 def apply_likeness(row: dict) -> float:

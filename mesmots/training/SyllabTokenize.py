@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 import polars as pl
-from utils import get_likeness_word
+from .utils import get_likeness_word
 
 def apply_likeness(row: dict) -> int:
     before = row["before"]

@@ -62,7 +62,7 @@ def word_split(word: str) -> list[str]:
 def pair_valid(word_a: list[str], word_b: list[str]) -> bool:
     return len(word_a) == len(word_b)
 
-def get_data(proba: SyllabEncoder, file: str = "./Lexique383/Lexique383.csv"):
+def get_data(proba: SyllabEncoder, file: str):
     df = (
         pl
         .read_csv(file, has_header=True)
@@ -87,7 +87,7 @@ def get_data(proba: SyllabEncoder, file: str = "./Lexique383/Lexique383.csv"):
 
 if __name__ == "__main__":
     proba = SyllabEncoder()
-    get_data(proba)
+    get_data(proba, "./dataset/Lexique383.csv")
     proba.finalize()
     print(proba.df)
     proba.write("./dataset/ProbaEncoder.csv")
