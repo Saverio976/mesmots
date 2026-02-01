@@ -77,7 +77,7 @@ class Mots:
             if len(syll) == 0:
                 return []
             sylls.append(syll[0][1])
-        return sylls
+        return ["".join(sylls)]
 
     def tail(self, s: str, n: int) -> str:
         return s[-n:]
