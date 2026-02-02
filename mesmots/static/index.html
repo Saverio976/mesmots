@@ -144,13 +144,13 @@
         const fwordsplitResultError = document.getElementById("fwordsplitResultError");
         fwordsplit.addEventListener("input", function (evt) {
             clearTimeout(fwordsplitTO);
+            fwordsplitResult.innerText = "";
+            fwordsplitResultError.innerText = "";
             if (evt.target.value === "") {
                 return;
             }
             fwordsplitTO = setTimeout(async function () {
                 const splits = await apiSplits(evt.target.value);
-                fwordsplitResult.innerText = "";
-                fwordsplitResultError.innerText = "";
                 if (splits[1] === "" && splits[2] == "") {
                     fwordsplitResult.innerText = splits[0].join(", ");
                 } else {
@@ -168,6 +168,8 @@
             if (evt.key === "Enter") {
                 event.preventDefault();
                 clearTimeout(fphoneticsTO);
+                fphoneticsResult.innerText = "";
+                fphoneticsResultError.innerText = "";
                 if (evt.target.innerText === "") {
                     return;
                 }
@@ -176,8 +178,6 @@
                     delete fphonetics.dataset.highlighted;
                     hljs.highlightElement(fphonetics);
                     const splits = await apiFind(evt.target.innerText);
-                    fphoneticsResult.innerText = "";
-                    fphoneticsResultError.innerText = "";
                     if (splits[1] === "" && splits[2] == "") {
                         fphoneticsResult.innerText = splits[0].join(", ");
                     } else {
