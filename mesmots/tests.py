@@ -13,6 +13,21 @@ class TestStringMethods(unittest.TestCase):
         self.assertTrue(isinstance(res, list))
         self.assertNotEqual(len(res), 0)
 
+    def test_split(self):
+        mots = Mots()
+        res = mots.syllab_tokenize.tokenize("macron")
+        self.assertTrue(isinstance(res, list))
+        self.assertNotEqual(len(res), 0)
+        
+        res = mots.syllab_decoder.get(orthosyll="bon", ortho_before="", ortho_after="jour")
+        self.assertTrue(isinstance(res, list))
+        self.assertNotEqual(len(res), 0)
+        
+        res = mots.split("bonjour")
+        self.assertTrue(isinstance(res, list))
+        self.assertNotEqual(len(res), 0)
+        
+
 if __name__ == "__main__":
     print("import OK")
     print("Starting unittest")
