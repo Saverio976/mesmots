@@ -101,11 +101,10 @@ class SyllabDecoder:
             .head(nb_result)
             .select("score", "syll")
         )
-        ranked: list[tuple[float, str]] = []
-        for row in res.iter_rows():
-            assert isinstance(row[0], float)
-            assert isinstance(row[1], str)
-            ranked.append((row[0], row[1]))
+        ranked: list[tuple[float, str]] = [
+            (x[0], x[1])
+            for x in res.iter_rows()
+        ]
         return ranked
 
 if __name__ == "__main__":

@@ -20,13 +20,9 @@ def apply_likeness(row: dict) -> int:
     word_now = word[:len(orthosyll)]
     word_after = word[len(orthosyll):]
     score = 0
-    params = {
-        "max_value": max_value,
-        "len_penaly": False,
-    }
-    score += get_likeness_word(s=ortho_before, x=before, reverse=True, **params)
-    score += get_likeness_word(s=orthosyll, x=word_now, reverse=False, **params)
-    score += get_likeness_word(s=ortho_after, x=word_after, reverse=False, **params)
+    score += get_likeness_word(s=ortho_before, x=before, reverse=True, max_value=max_value, len_penaly=False)
+    score += get_likeness_word(s=orthosyll, x=word_now, reverse=False, max_value=max_value, len_penaly=False)
+    score += get_likeness_word(s=ortho_after, x=word_after, reverse=False, max_value=max_value, len_penaly=False)
     return score
 
 class SyllabTokenize:
@@ -87,7 +83,7 @@ class SyllabTokenize:
         res = self.__tokenize(word, [""])
         if res is None:
             return res
-        if len(res) == 0:
+        if not res:
             return res
         if res[0] == "":
             return res[1:]
