@@ -65,10 +65,9 @@ class Mots:
             .filter(pl.col("ortho") == word)
             .select("phon")
             .unique("phon")
-            .transpose().to_series().to_list()
         )
-        if tmp:
-            return list(tmp)
+        if tmp.height:
+            return tmp.transpose().to_series().to_list()
         print("not found in db, creating one...")
         tokens = self.syllab_tokenize.tokenize(word)
         if tokens is None:
@@ -95,6 +94,7 @@ class Mots:
 def main():
     m = Mots()
     print(m.split("bonjour"))
+    print(m.split("macron"))
     #m = Mots()
     #print("Hello from mesmots!")
     #r1 = m.endswith(m.tail(m.split("saisissant")[0], 2))
