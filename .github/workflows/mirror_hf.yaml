@@ -1,0 +1,17 @@
+name: mirror-repository
+
+on: push
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: yesolutions/mirror-action@v0.7.0
+        with:
+          REMOTE_NAME: "hf"
+          REMOTE: "https://huggingface.co/spaces/Saverio976/MesMots"
+          GIT_USERNAME: "${{ secrets.HF_USER }}"
+          GIT_PASSWORD: "${{ secrets.HF_TOKEN }}"
