@@ -25,11 +25,11 @@ seval.functions["or"] = lambda x,y: mots.or_(x, y)
 seval.functions["xor"] = lambda x,y: mots.xor_(x, y)
 
 @app.get("/")
-def index():
+async def index():
     return RedirectResponse("/static/index.html", status_code=301)
 
 @app.get("/api/v1/split/{word}/", response_class=ORJSONResponse)
-def split(word: str):
+async def split(word: str):
     res = mots.split(word)
     if len(res) == 0:
         raise HTTPException(status_code=400, details="The word provided is not found in the database")
@@ -39,7 +39,7 @@ class INFindSchema(BaseModel):
     text: str
 
 @app.post("/api/v1/find/", response_class=ORJSONResponse)
-def find(body: INFindSchema):
+async def find(body: INFindSchema):
     try:
         res = seval.eval(body.text)
     except Exception as e:

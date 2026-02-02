@@ -60,12 +60,15 @@ class Mots:
         return self.lex.filter(expr).select("ortho").to_series().unique().to_list()
 
     def split(self, word: str) -> list[str]:
-        tmp = self.lex.filter(pl.col("ortho") == word).select("phon")
-        res: set[str] = set()
-        for row in tmp.iter_rows():
-            res.add(row[0])
-        if len(res) != 0:
-            return list(res)
+        tmp = (
+            self.lex
+            .filter(pl.col("ortho") == word)
+            .select("phon")
+            .unique("phon")
+            .transpose().to_series().to_list()
+        )
+        if tmp:
+            return list(tmp)
         print("not found in db, creating one...")
         tokens = self.syllab_tokenize.tokenize(word)
         if tokens is None:
@@ -90,6 +93,8 @@ class Mots:
 
 
 def main():
+    m = Mots()
+    print(m.split("bonjour"))
     #m = Mots()
     #print("Hello from mesmots!")
     #r1 = m.endswith(m.tail(m.split("saisissant")[0], 2))
@@ -101,14 +106,19 @@ def main():
     #r4 = m.category(Mots.Category.ADJ)
     #print("r4", m.apply(m.and_(m.or_(r1, r2), r4)), "r4")
     #m.write_csv("./Lexique383/Lexique383.csv")
-    print("Generating csv")
-    df = pl.read_csv(
-        "./dataset/Lexique383.tsv",
-        has_header=True,
-        separator="\t",
-    ).select("ortho", "phon", "cgram", "syll", "orthosyll").drop_nulls()
-    print(df)
-    df.write_csv("./dataset/Lexique383.csv")
+    import os.path
+    p = "./dataset/Lexique383.tsv"
+    if os.path.isfile(p):
+        print("Generating csv")
+        df = pl.read_csv(
+            p,
+            has_header=True,
+            separator="\t",
+        ).select("ortho", "phon", "cgram", "syll", "orthosyll").drop_nulls()
+        print(df)
+        df.write_csv("./dataset/Lexique383.csv")
+    else:
+        print("TSV not found")
 
 if __name__ == "__main__":
     main()
