@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "bottle>=0.13.4",
+    "fastapi[standard-no-fastapi-cloud-cli]>=0.128.0",
+    "orjson>=3.11.6",
     "polars>=1.37.1",
     "requests>=2.32.5",
     "simpleeval>=1.0.3",

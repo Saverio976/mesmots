@@ -19,4 +19,4 @@ COPY --chown=user dataset /app/dataset
 
 WORKDIR /app/mesmots
 
-CMD ["uv", "run", "."]
+CMD ["uv", "run", ".""]
