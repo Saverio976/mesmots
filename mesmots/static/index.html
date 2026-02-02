@@ -144,6 +144,9 @@
         const fwordsplitResultError = document.getElementById("fwordsplitResultError");
         fwordsplit.addEventListener("input", function (evt) {
             clearTimeout(fwordsplitTO);
+            if (evt.target.value === "") {
+                return;
+            }
             fwordsplitTO = setTimeout(async function () {
                 const splits = await apiSplits(evt.target.value);
                 fwordsplitResult.innerText = "";
@@ -165,6 +168,9 @@
             if (evt.key === "Enter") {
                 event.preventDefault();
                 clearTimeout(fphoneticsTO);
+                if (evt.target.innerText === "") {
+                    return;
+                }
                 fphoneticsTO = setTimeout(async function () {
                     fphonetics.innerText = evt.target.innerText;
                     delete fphonetics.dataset.highlighted;
