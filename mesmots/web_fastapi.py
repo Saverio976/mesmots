@@ -32,7 +32,7 @@ async def index():
 async def split(word: str):
     res = mots.split(word)
     if len(res) == 0:
-        raise HTTPException(status_code=400, details="The word provided is not found in the database")
+        raise HTTPException(status_code=400, detail="The word provided is not found in the database")
     return {"splits": res}
 
 class INFindSchema(BaseModel):
@@ -43,7 +43,7 @@ async def find(body: INFindSchema):
     try:
         res = seval.eval(body.text)
     except Exception as e:
-        raise HTTPException(status_code=400, details=f"Failed to compute: {e}")
+        raise HTTPException(status_code=400, detail=f"Failed to compute: {e}")
     words = mots.apply(res)
     return {"words": words}
 
