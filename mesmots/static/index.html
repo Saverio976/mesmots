@@ -36,6 +36,7 @@
             <input type="text" id="fwordsplit" name="fwordsplit"><br>
         </form>
         <p><samp id="fwordsplitResult" style="letter-spacing:0.1rem"></samp></p>
+        <p id="fwordsplitResultError"></p>
     </div>
 
     <div id="get_words_from_phonetics" style="border-style: inset; padding: 5px; margin: 5px">
@@ -81,6 +82,7 @@
             ></code></pre>
         </form>
         <p><samp id="fphoneticsResult" style="letter-spacing:0.1rem"></samp></p>
+        <p id="fphoneticsResultError"></p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -115,10 +117,10 @@
         async function apiSplits(s) {
             const req = await fetch(apiUrl + `split/${s}/`);
             if (!req.ok) {
-                return [];
+                return [[], req.statusText, await req.text()];
             }
             const data = await req.json();
-            return data.splits;
+            return [data.splits, "", ""];
         }
         async function apiFind(s) {
             const req = await fetch(apiUrl + `find/`, {
@@ -129,21 +131,28 @@
                 body: JSON.stringify({text: s}),
             });
             if (!req.ok) {
-                return [];
+                return [[], req.statusText, await req.text()];
             }
             const data = await req.json();
-            return data.words;
+            return [data.words, "", ""];
         }
 
         // Get phonectics from word
         let fwordsplitTO = setTimeout(function () {}, 1);
         const fwordsplit = document.getElementById("fwordsplit");
         const fwordsplitResult = document.getElementById("fwordsplitResult");
+        const fwordsplitResultError = document.getElementById("fwordsplitResultError");
         fwordsplit.addEventListener("input", function (evt) {
             clearTimeout(fwordsplitTO);
             fwordsplitTO = setTimeout(async function () {
                 const splits = await apiSplits(evt.target.value);
-                fwordsplitResult.innerText = splits.join(", ");
+                fwordsplitResult.innerText = "";
+                fwordsplitResultError.innerText = "";
+                if (splits[1] === "" && splits[2] == "") {
+                    fwordsplitResult.innerText = splits[0].join(", ");
+                } else {
+                    fwordsplitResultError.innerText = "Error: " + splits[1] + splits[2];
+                }
             }, 500);
         });
 
@@ -151,6 +160,7 @@
         let fphoneticsTO = setTimeout(function () {}, 1);
         const fphonetics = document.getElementById("fphonetics");
         const fphoneticsResult = document.getElementById("fphoneticsResult");
+        const fphoneticsResultError = document.getElementById("fphoneticsResultError");
         fphonetics.addEventListener("keypress", function (evt) {
             if (evt.key === "Enter") {
                 event.preventDefault();
@@ -160,7 +170,13 @@
                     delete fphonetics.dataset.highlighted;
                     hljs.highlightElement(fphonetics);
                     const splits = await apiFind(evt.target.innerText);
-                    fphoneticsResult.innerText = splits.join(", ");
+                    fphoneticsResult.innerText = "";
+                    fphoneticsResultError.innerText = "";
+                    if (splits[1] === "" && splits[2] == "") {
+                        fphoneticsResult.innerText = splits[0].join(", ");
+                    } else {
+                        fphoneticsResultError.innerText = "Error: " + splits[1] + splits[2];
+                    }
                 }, 500);
             }
         });
