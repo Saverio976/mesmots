@@ -30,7 +30,7 @@ async def index():
 
 @app.get("/api/v1/split/{word}/", response_class=ORJSONResponse)
 async def split(word: str):
-    res = mots.split(word)
+    res = await mots.split(word)
     if len(res) == 0:
         raise HTTPException(status_code=400, detail="The word provided is not found in the database")
     return {"splits": res}
@@ -44,7 +44,7 @@ async def find(body: INFindSchema):
         res = seval.eval(body.text)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to compute: {e}")
-    words = mots.apply(res)
+    words = await mots.apply(res)
     return {"words": words}
 
 def start():

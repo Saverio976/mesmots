@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from enum import Enum
 import polars as pl
+import asyncio
 
 from training.SyllabTokenize import SyllabTokenize
 from training.SyllabDecoder import SyllabDecoder
@@ -56,10 +57,19 @@ class Mots:
     def xor_(self, a: pl.Expr, b: pl.Expr) -> pl.Expr:
         return a ^ b
 
-    def apply(self, expr: pl.Expr) -> list[str]:
-        return self.lex.filter(expr).select("ortho").to_series().unique().to_list()
+    async def apply(self, expr: pl.Expr) -> list[str]:
+        res = (
+            self.lex
+            .lazy()
+            .filter(expr)
+            .select("ortho")
+            .unique(["ortho"])
+            .collect_async()
+        )
+        res = await res
+        return res.to_series().to_list()
 
-    def split(self, word: str) -> list[str]:
+    async def split(self, word: str) -> list[str]:
         tmp = (
             self.lex
             .filter(pl.col("ortho") == word)
@@ -69,13 +79,17 @@ class Mots:
         if tmp.height:
             return tmp.transpose().to_series().to_list()
         print("not found in db, creating one...")
-        tokens = self.syllab_tokenize.tokenize(word)
+        tokens = await self.syllab_tokenize.tokenize(word)
         if tokens is None:
             return []
         tokens = [""] + tokens + [""]
-        sylls: list[str] = []
+        sylls_awaiter = []
         for i in range(1, len(tokens) - 1):
             syll = self.syllab_decoder.get(tokens[i], tokens[i - 1], tokens[i + 1])
+            sylls_awaiter.append(syll)
+        res = await asyncio.gather(*sylls_awaiter)
+        sylls: list[str] = []
+        for syll in res:
             if len(syll) == 0:
                 return []
             sylls.append(syll[0][1])
@@ -91,10 +105,10 @@ class Mots:
         self.lex.write_csv(file)
 
 
-def main():
+async def main():
     m = Mots()
-    print(m.split("bonjour"))
-    print(m.split("macron"))
+    print(await m.split("bonjour"))
+    print(await m.split("macron"))
     #m = Mots()
     #print("Hello from mesmots!")
     #r1 = m.endswith(m.tail(m.split("saisissant")[0], 2))
@@ -121,4 +135,4 @@ def main():
         print("TSV not found")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

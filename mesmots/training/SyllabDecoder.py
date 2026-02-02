@@ -81,9 +81,10 @@ class SyllabDecoder:
             pl.lit(self.nb_usage_max).alias("nb_usage_max"),
         )
 
-    def get(self, orthosyll: str, ortho_before: str, ortho_after: str, nb_result: int = 5) -> list[tuple[float, str]]:
+    async def get(self, orthosyll: str, ortho_before: str, ortho_after: str, nb_result: int = 5) -> list[tuple[float, str]]:
         res = (
             self.df
+            .lazy()
             .filter(pl.col("orthosyll") == orthosyll)
             .with_columns(
                 pl.lit(ortho_before).alias("input_ortho_before"),
@@ -100,15 +101,21 @@ class SyllabDecoder:
             .unique(["syll"], keep="first", maintain_order=True)
             .head(nb_result)
             .select("score", "syll")
+            .collect_async()
         )
+        res = await res
         ranked: list[tuple[float, str]] = [
             (x[0], x[1])
             for x in res.iter_rows()
         ]
         return ranked
 
-if __name__ == "__main__":
+async def main():
     proba = SyllabDecoder("./dataset/ProbaEncoder.csv")
     print(
-        proba.get(orthosyll="bon", ortho_before="", ortho_after="jour")
+        await proba.get(orthosyll="bon", ortho_before="", ortho_after="jour")
     )
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

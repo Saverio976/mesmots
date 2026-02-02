@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 import polars as pl
+import asyncio
 try:
     from .utils import get_likeness_word
 except ImportError:
@@ -50,11 +51,12 @@ class SyllabTokenize:
         )
         self.df = self.df.with_columns(pl.lit(self.syllab_len_max).alias("max_value"))
 
-    def __tokenize(self, word: str, before: list[str]) -> list[str] | None:
+    async def __tokenize(self, word: str, before: list[str]) -> list[str] | None:
         if word == "":
             return before
         res = (
             self.df
+            .lazy()
             .with_columns(
                 pl.lit(word).alias("word"),
                 pl.lit(before[-1]).alias("before")
@@ -66,21 +68,23 @@ class SyllabTokenize:
                 .alias("score")
             )
             .sort("score", descending=True)
+            .select("orthosyll")
+            .unique(["orthosyll"], keep="first", maintain_order=True)
+            .collect_async()
         )
-        possibilities = res .select("orthosyll")
+        possibilities = await res
         for row in possibilities.iter_rows():
             assert isinstance(row[0], str)
             word_test = word[len(row[0]):]
             before_test = before + [row[0]]
-            recursive = self.__tokenize(word_test, before_test)
+            recursive = await self.__tokenize(word_test, before_test)
             if recursive is None:
                 continue
             return recursive
         return None
 
-
-    def tokenize(self, word: str) -> list[str] | None:
-        res = self.__tokenize(word, [""])
+    async def tokenize(self, word: str) -> list[str] | None:
+        res = await self.__tokenize(word, [""])
         if res is None:
             return res
         if not res:
@@ -89,8 +93,11 @@ class SyllabTokenize:
             return res[1:]
         return res
 
-if __name__ == "__main__":
+async def main():
     proba = SyllabTokenize("./dataset/ProbaEncoder.csv")
     print(
-        proba.tokenize("macron")
+        await proba.tokenize("macron")
     )
+
+if __name__ == "__main__":
+    asyncio.run(main())
