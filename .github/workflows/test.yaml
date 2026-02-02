@@ -1,4 +1,4 @@
-name: test repository
+name: test-repository
 
 on:
   push:
@@ -26,7 +26,5 @@ jobs:
       - uses: actions/checkout@v6
       - name: astral-sh/setup-uv
         uses: astral-sh/setup-uv@v7.2.1
-        with:
-          checksum: true
       - name: Run Tests
         run: uv run mesmots/tests.py
