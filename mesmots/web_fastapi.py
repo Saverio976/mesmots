@@ -47,5 +47,10 @@ async def find(body: INFindSchema):
     words = await mots.apply(res)
     return {"words": words}
 
+@app.get("/api/v1/plot/{syllab}/", response_class=ORJSONResponse)
+async def plot(syllab: str):
+    res = await mots.plot(syllab)
+    return {"before": res[0], "after": res[1]}
+
 def start():
     uvicorn.run("web_fastapi:app", host=HOST, port=int(PORT))

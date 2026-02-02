@@ -5,6 +5,7 @@ import asyncio
 
 from training.SyllabTokenize import SyllabTokenize
 from training.SyllabDecoder import SyllabDecoder
+from training.SyllabPlot import SyllabPlot
 
 
 class Mots:
@@ -25,6 +26,7 @@ class Mots:
     subset: Iterable[str]
     syllab_tokenize: SyllabTokenize
     syllab_decoder: SyllabDecoder
+    syllab_plot: SyllabPlot
 
     def __init__(self, dataset_dir: str = "./dataset/", subset: Iterable[str] = ("ortho", "phon", "cgram"), **kwargs) -> None:
         self.lex = pl.read_csv(
@@ -35,6 +37,7 @@ class Mots:
         self.subset = subset
         self.syllab_tokenize = SyllabTokenize(dataset_dir + "ProbaEncoder.csv")
         self.syllab_decoder = SyllabDecoder(dataset_dir + "ProbaEncoder.csv")
+        self.syllab_plot = SyllabPlot(dataset_dir + "ProbaEncoder.csv")
 
     def endswith(self, phon: str) -> pl.Expr:
         return pl.col("phon").str.ends_with(phon)
@@ -94,6 +97,9 @@ class Mots:
                 return []
             sylls.append(syll[0][1])
         return ["".join(sylls)]
+    
+    async def plot(self, syllab: str) -> tuple[list[str], list[str]]:
+        return await self.syllab_plot.get_usual_before_after(syllab)
 
     def tail(self, s: str, n: int) -> str:
         return s[-n:]

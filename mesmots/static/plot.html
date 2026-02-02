@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MesMots</title>
+    <style>
+    body {
+        background-color: black;
+        color: white;
+    }
+    code {
+        font-weight: bolder;
+        font-family: monospace;
+        font-size: x-large;
+    }
+    .vertical-menu {
+        width: 200px;
+    }
+    .vertical-menu a {
+        background-color: #eee;
+        color: black;
+        display: block;
+        padding: 12px;
+        text-decoration: none;
+    }
+    .vertical-menu a:hover {
+        background-color: #ccc;
+    }
+    .vertical-menu a.active {
+        background-color: #04AA6D;
+        color: white;
+    }
+    </style>
+</head>
+<body>
+    <h1>MesMots</h1>
+
+    <p>Some words phonetic logic</p>
+
+    <p>The code is available at <a href="https://github.com/Saverio976/mesmots/">github.com/Saverio976/mesmots/</a></p>
+
+    <div class="vertical-menu">
+        <a href="/static/index.html">Home</a>
+        <a href="/static/plot.html" class="active">Plot</a>
+    </div>
+
+    <div id="plot" style="border-style: inset; padding: 5px; margin: 5px">
+        <h2>Plot</h2>
+
+        <details open="true" style="border-style: dashed; padding: 5px;">
+            <summary>Cheat Sheet</summary>
+            <p>Enter a syllab<p>
+        </details>
+        <br>
+
+        <form>
+            <label for="forthoplot">Syllabe:</label>
+            <input type="text" id="forthoplot" name="forthoplot"><br>
+        </form>
+        <p><samp id="forthoplotResultBefore" style="letter-spacing:0.1rem"></samp></p>
+        <br>
+        <p><samp id="forthoplotResultAfter" style="letter-spacing:0.1rem"></samp></p>
+        <p id="forthoplotResultError"></p>
+    </div>
+
+    <script>
+        // backend
+        const apiUrl = `${location.protocol}//${location.host}/api/v1/`;
+        console.log(apiUrl);
+        async function apiPlot(s) {
+            const req = await fetch(apiUrl + `plot/${s}/`);
+            if (!req.ok) {
+                return [[], req.statusText, await req.text()];
+            }
+            const data = await req.json();
+            return [data.splits, "", ""];
+        }
+
+        // Get phonectics from word
+        let forthoplotTO = setTimeout(function () {}, 1);
+        const forthoplot = document.getElementById("forthoplot");
+        const forthoplotResultBefore = document.getElementById("forthoplotResultBefore");
+        const forthoplotResultAfter = document.getElementById("forthoplotResultAfter");
+        const forthoplotResultError = document.getElementById("forthoplotResultError");
+        forthoplot.addEventListener("input", function (evt) {
+            clearTimeout(forthoplotTO);
+            forthoplotResultBefore.innerText = "";
+            forthoplotResultAfter.innerText = "";
+            forthoplotResultError.innerText = "";
+            if (evt.target.value === "") {
+                return;
+            }
+            forthoplotTO = setTimeout(async function () {
+                const splits = await apiPlot(evt.target.value);
+                if (splits[1] === "" && splits[2] == "") {
+                    forthoplotResultBefore.innerText = splits[0]["before"].join(", ");
+                    forthoplotResultAfter.innerText = splits[0]["after"].join(", ");
+                } else {
+                    forthoplotResultError.innerText = "Error: " + splits[1] + splits[2];
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
