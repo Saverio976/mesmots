@@ -8,7 +8,11 @@
 
 ### Requesting a feature
 
-- Create a new issue <https://github.com/Saverio976/mesmots/issues/new>
+- Create a new issue <https://github.com/Saverio976/mesmots/issues/new?template=feature_request.md>
+
+### Requesting a bug fix
+
+- Create a new issue <https://github.com/Saverio976/mesmots/issues/new?template=bug_report.md>
 
 ### Working on a issue
 
