@@ -27,7 +27,7 @@ class SyllabPlot:
             pl.read_csv(encoder, has_header=True, schema=self.schema)
         ))
 
-    async def get_usual_before_after(self, ortho) -> tuple[list[str], list[str]]:
+    async def get_usual_before_after(self, ortho: str) -> tuple[list[str], list[str]]:
         res = (
             self.df
             .lazy()

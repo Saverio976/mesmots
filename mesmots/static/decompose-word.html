@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MesMots</title>
+    <title>MesMots - DecomposeWord</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         body {
@@ -73,20 +73,68 @@
 </head>
 <body>
     <div class="topnav" id="myTopnav">
-        <a href="/static/index.html" class="active">Home</a>
+        <a href="/static/index.html">Home</a>
         <a href="/static/find-word.html">Find Word</a>
-        <a href="/static/decompose-word.html">Decompose Word</a>
+        <a href="/static/decompose-word.html" class="active">Decompose Word</a>
         <a href="/static/plot.html">Plot</a>
         <a href="javascript:void(0);" class="icon" onclick="updateResponsive()">
             <i class="fa fa-bars"></i>
         </a>
     </div>
-    <h1>MesMots</h1>
+    <h1>Decompose Word</h1>
 
-    <p>Some words phonetic logic</p>
+    <div id="get_phonetics_from_word" style="border-style: inset; padding: 5px; margin: 5px">
+        <h2>Get phonectics from word</h2>
 
-    <p>The code is available at <a href="https://github.com/Saverio976/mesmots/">github.com/Saverio976/mesmots/</a></p>
+        <details open="true" style="border-style: dashed; padding: 5px;">
+            <summary>Cheat Sheet</summary>
+            <p>Enter a word, you will get live results once the word match a word in the database.<p>
+        </details>
+        <br>
 
+        <form>
+            <label for="fwordsplit">Word:</label>
+            <input type="text" id="fwordsplit" name="fwordsplit"><br>
+        </form>
+        <p><samp id="fwordsplitResult" style="letter-spacing:0.1rem"></samp></p>
+        <p id="fwordsplitResultError"></p>
+    </div>
+
+    <script>
+        // backend
+        const apiUrl = `${location.protocol}//${location.host}/api/v1/`;
+        console.log(apiUrl);
+        async function apiSplits(s) {
+            const req = await fetch(apiUrl + `split/${s}/`);
+            if (!req.ok) {
+                return [[], req.statusText, await req.text()];
+            }
+            const data = await req.json();
+            return [data.splits, "", ""];
+        }
+
+        // Get phonectics from word
+        let fwordsplitTO = setTimeout(function () {}, 1);
+        const fwordsplit = document.getElementById("fwordsplit");
+        const fwordsplitResult = document.getElementById("fwordsplitResult");
+        const fwordsplitResultError = document.getElementById("fwordsplitResultError");
+        fwordsplit.addEventListener("input", function (evt) {
+            clearTimeout(fwordsplitTO);
+            fwordsplitResult.innerText = "";
+            fwordsplitResultError.innerText = "";
+            if (evt.target.value === "") {
+                return;
+            }
+            fwordsplitTO = setTimeout(async function () {
+                const splits = await apiSplits(evt.target.value);
+                if (splits[1] === "" && splits[2] == "") {
+                    fwordsplitResult.innerText = splits[0].join(", ");
+                } else {
+                    fwordsplitResultError.innerText = "Error: " + splits[1] + splits[2];
+                }
+            }, 500);
+        });
+    </script>
     <script>
         function updateResponsive() {
             var x = document.getElementById("myTopnav");

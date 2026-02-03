@@ -2,6 +2,7 @@ from collections.abc import Iterable
 from enum import Enum
 import polars as pl
 import asyncio
+from simpleeval import SimpleEval
 
 from training.SyllabTokenize import SyllabTokenize
 from training.SyllabDecoder import SyllabDecoder
@@ -27,6 +28,7 @@ class Mots:
     syllab_tokenize: SyllabTokenize
     syllab_decoder: SyllabDecoder
     syllab_plot: SyllabPlot
+    seval: SimpleEval
 
     def __init__(self, dataset_dir: str = "./dataset/", subset: Iterable[str] = ("ortho", "phon", "cgram"), **kwargs) -> None:
         self.lex = pl.read_csv(
@@ -38,6 +40,13 @@ class Mots:
         self.syllab_tokenize = SyllabTokenize(dataset_dir + "ProbaEncoder.csv")
         self.syllab_decoder = SyllabDecoder(dataset_dir + "ProbaEncoder.csv")
         self.syllab_plot = SyllabPlot(dataset_dir + "ProbaEncoder.csv")
+        self.seval = SimpleEval(
+            functions={
+                "startswith": lambda x: self.startswith(x),
+                "endswith": lambda x: self.endswith(x),
+                "contains": lambda x: self.contains(x),
+            },
+        )
 
     def endswith(self, phon: str) -> pl.Expr:
         return pl.col("phon").str.ends_with(phon)
