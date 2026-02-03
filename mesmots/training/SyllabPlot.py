@@ -2,10 +2,12 @@ from collections.abc import Iterable
 import polars as pl
 import asyncio
 
-async def to_dict(df: pl.DataFrame):
+async def to_dict(lf: pl.LazyFrame):
+    lf = lf.select("orthosyll")
+    df = await lf.collect_async()
     res: list[str] = [
         row[0]
-        for row in df.select("orthosyll").iter_rows()
+        for row in df.iter_rows()
     ]
     return res
 
@@ -50,11 +52,7 @@ class SyllabPlot:
             .select("ortho_after", "orthosyll")
             .unique("orthosyll", keep="first", maintain_order=True)
         )
-        res_before, res_after = await asyncio.gather(res_before_.collect_async(), res_after_.collect_async())
-        res_before_list = asyncio.create_task(to_dict(res_before))
-        res_after_list = asyncio.create_task(to_dict(res_after))
-        res_before_list = await res_before_list
-        res_after_list = await res_after_list
+        res_before_list, res_after_list = await asyncio.gather(to_dict(res_before_), to_dict(res_after_))
         return res_before_list, res_after_list
 
 
